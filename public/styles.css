@@ -95,7 +95,8 @@ footer a{color:#fff}
 @media(max-width:900px){
   .hero-grid,.grid3,.cars,.foot-grid{grid-template-columns:1fr}
   nav.main{width:100%; flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:thin}
-  nav.main a{padding:8px 10px; font-size:12px; white-space:nowrap; flex:none}
+  nav.main a{padding:8px 10px; font-size:12px; white-space:nowrap; flex:1; text-align:center}
+  nav.main a.nav-t{display:none}
   .topbar{padding:8px 0; gap:8px}
   .logo{gap:8px}
   .logo-mark{width:30px; height:30px; font-size:14px; box-shadow:2px 2px 0 #111}
