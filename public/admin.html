@@ -31,8 +31,8 @@
 <label>Titel * (z.B. VW Golf 1.6 TDI)</label><input type="text" id="titel" required maxlength="120">
 <div class="form-grid">
 <div><label>Preis € *</label><input type="number" id="preis" required min="1" step="1"></div>
-<div><label>Kilometer *</label><input type="number" id="km" required min="0" step="100"></div>
-<div><label>Baujahr</label><input type="number" id="baujahr" min="1980" max="2026" value="2018"></div>
+<div><label>Kilometer *</label><input type="number" id="km" required min="0" step="1"></div>
+<div><label>Baujahr</label><input type="number" id="baujahr" min="1980" max="2027" value="2018"></div>
 <div><label>Leistung (PS)</label><input type="number" id="leistung" min="0" value="110"></div>
 <div><label>Kraftstoff</label><select id="kraftstoff"><option>Benzin</option><option selected>Diesel</option><option>Hybrid</option><option>Elektro</option><option>Gas</option></select></div>
 <div><label>Getriebe</label><select id="getriebe"><option>Schaltgetriebe</option><option>Automatik (DSG)</option><option>Automatik</option></select></div>
@@ -42,11 +42,17 @@
 <label>Fotos (bis 8, max 8MB/Stk) — beim Bearbeiten: neue anhängen, alte per ✕ entfernen</label>
 <input type="file" id="bilder" accept="image/*" multiple>
 <div id="keep" style="margin-top:8px"></div>
-<p style="margin-top:14px"><button class="btn" type="submit">Speichern</button> <button class="btn ghost" type="button" id="reset">Abbrechen</button></p>
+<p style="margin-top:14px"><button class="btn" type="submit" id="save-btn">Speichern</button> <button class="btn ghost" type="button" id="reset">Abbrechen</button></p>
+<p id="save-status" style="font-weight:700"></p>
 </form></div></div>
 
 <div class="card" style="margin-top:16px"><div class="hd"><span>Alle Inserate</span><span id="cnt"></span></div><div class="bd" style="overflow-x:auto">
-<table class="list"><thead><tr><th>Foto</th><th>Titel</th><th>Preis</th><th>KM</th><th>Bj</th><th>Aktion</th></tr></thead><tbody id="rows"></tbody></table>
+<table class="list"><thead><tr><th>Foto</th><th>Titel</th><th>Preis</th><th>KM</th><th>Status</th><th>Aktion</th></tr></thead><tbody id="rows"></tbody></table>
+</div></div>
+
+<div class="card" style="margin-top:16px"><div class="hd"><span>Archiv / Journal</span><span id="a-cnt"></span></div><div class="bd" style="overflow-x:auto">
+<p><button class="small-btn del" id="archiv-clear">Journal leeren</button></p>
+<table class="list"><thead><tr><th>Typ</th><th>Eintrag</th><th>Archiviert</th><th>Aktion</th></tr></thead><tbody id="a-rows"></tbody></table>
 </div></div>
 
 <div class="card" style="margin-top:16px"><div class="hd"><span>Termin-Anfragen</span><span id="t-cnt"></span></div><div class="bd" style="overflow-x:auto">
@@ -66,7 +72,9 @@ $('login-btn').onclick=async()=>{
   const d=await r.json(); TOKEN=d.token; localStorage.setItem('aw_token',TOKEN); showApp();
 };
 $('logout').onclick=()=>{localStorage.removeItem('aw_token'); location.reload();};
-function showApp(){$('login-card').style.display='none';$('app').style.display='block';$('logout').style.display='block';load(); loadTermine();}
+function showApp(){$('login-card').style.display='none';$('app').style.display='block';$('logout').style.display='block';load(); loadTermine(); loadArchiv();}
+const STLBL={aktiv:'Aktiv',versteckt:'Versteckt',verkauft:'Verkauft'};
+const TYPLBL={'auto-verkauft':'Verkauft','auto-gelöscht':'Gelöscht','termin-abgelaufen':'Termin vorbei'};
 async function loadTermine(){
   const r=await fetch('/api/termine',{headers:{'x-admin-key':TOKEN}}); const T=await r.json();
   $('t-cnt').textContent=T.length+' STK';
@@ -81,13 +89,25 @@ window.delTermin=async id=>{
   loadTermine();
 };
 async function load(){
-  const r=await fetch('/api/cars'); ALL=await r.json();
+  const r=await fetch('/api/admin/cars',{headers:{'x-admin-key':TOKEN}});
+  if(r.status===401){alert('Session abgelaufen — neu einloggen');localStorage.removeItem('aw_token');location.reload();return;}
+  ALL=await r.json();
   $('cnt').textContent=ALL.length+' STK';
   $('rows').innerHTML=ALL.map(c=>`<tr><td>${c.bilderUrls&&c.bilderUrls[0]?`<img class="thumb" alt="${esc(c.titel)}" src="${c.bilderUrls[0]}">`:'—'}</td>
   <td><b>${esc(c.titel)}</b><br><span class="mono" style="font-size:11px">${esc(c.kraftstoff)} · ${esc(c.getriebe)}</span></td>
-  <td><b>${Number(c.preis).toLocaleString('de-DE')} €</b></td><td>${Number(c.km).toLocaleString('de-DE')}</td><td>${c.baujahr}</td>
-  <td><div class="row-actions"><button class="small-btn edit" onclick="editCar('${c.id}')">Edit</button><button class="small-btn del" onclick="delCar('${c.id}')">✕</button></div></td></tr>`).join('');
+  <td><b>${Number(c.preis).toLocaleString('de-DE')} €</b></td><td>${Number(c.km).toLocaleString('de-DE')}</td>
+  <td><span class="badge b-${c.status||'aktiv'}">${STLBL[c.status||'aktiv']||esc(c.status)}</span></td>
+  <td><div class="row-actions"><button class="small-btn edit" onclick="editCar('${c.id}')">Edit</button>${(c.status||'aktiv')==='versteckt'?`<button class="small-btn" onclick="setStatus('${c.id}','aktiv')">Zeigen</button>`:`<button class="small-btn" onclick="setStatus('${c.id}','versteckt')">Verstecken</button>`}<button class="small-btn edit" onclick="setSold('${c.id}')">Verkauft ✓</button><button class="small-btn del" onclick="delCar('${c.id}')">✕</button></div></td></tr>`).join('')||'<tr><td colspan="6">Keine Inserate.</td></tr>';
 }
+window.setStatus=async (id,status)=>{
+  await fetch('/api/cars/'+id+'/status',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':TOKEN},body:JSON.stringify({status})});
+  load();
+};
+window.setSold=async id=>{
+  if(!confirm('Als verkauft markieren? Das Inserat wandert ins Journal.'))return;
+  await fetch('/api/cars/'+id+'/status',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':TOKEN},body:JSON.stringify({status:'verkauft'})});
+  load(); loadArchiv();
+};
 window.editCar=id=>{
   const c=ALL.find(x=>x.id===id); if(!c)return;
   $('fid').value=c.id; $('titel').value=c.titel; $('preis').value=c.preis; $('km').value=c.km;
@@ -99,23 +119,53 @@ window.editCar=id=>{
   window.scrollTo({top:0,behavior:'smooth'});
 };
 window.delCar=async id=>{
-  if(!confirm('Wirklich löschen?'))return;
+  if(!confirm('Wirklich löschen? Das Inserat wandert ins Journal.'))return;
   await fetch('/api/cars/'+id,{method:'DELETE',headers:{'x-admin-key':TOKEN}});
-  load();
+  load(); loadArchiv();
+};
+async function loadArchiv(){
+  const r=await fetch('/api/archiv',{headers:{'x-admin-key':TOKEN}}); const A=await r.json();
+  $('a-cnt').textContent=A.length+' STK';
+  $('a-rows').innerHTML=A.map(a=>{
+    let info='';
+    try{
+      const p=JSON.parse(a.payload||'{}');
+      if(a.typ==='termin-abgelaufen')info=esc(p.telefon||'')+' · '+esc(p.datum||'')+' '+esc(p.uhrzeit||'')+' · '+esc(p.leistung||'');
+      else info=(p.preis!=null?Number(p.preis).toLocaleString('de-DE')+' € · ':'')+(p.km!=null?Number(p.km).toLocaleString('de-DE')+' km · ':'')+esc(p.baujahr||'');
+    }catch(e){info='—';}
+    const d=String(a.archiviertAm||'').slice(0,16).replace('T',' ');
+    return `<tr><td><span class="badge b-arch">${TYPLBL[a.typ]||esc(a.typ)}</span></td><td><b>${esc(a.titel)}</b><br><span class="mono" style="font-size:11px">${info}</span></td><td class="mono" style="font-size:12px">${esc(d)}</td><td><button class="small-btn del" onclick="delArchiv('${a.id}')">✕</button></td></tr>`;
+  }).join('')||'<tr><td colspan="4">Journal leer.</td></tr>';
+}
+window.delArchiv=async id=>{
+  await fetch('/api/archiv/'+id,{method:'DELETE',headers:{'x-admin-key':TOKEN}});
+  loadArchiv();
+};
+$('archiv-clear').onclick=async()=>{
+  if(!confirm('Ganzes Journal löschen?'))return;
+  await fetch('/api/archiv',{method:'DELETE',headers:{'x-admin-key':TOKEN}});
+  loadArchiv();
 };
 $('reset').onclick=()=>{$('f').reset();$('fid').value='';$('keep').innerHTML='';$('form-title').textContent='Neues Inserat';};
 $('f').onsubmit=async e=>{
   e.preventDefault();
-  const fd=new FormData();
-  ['titel','preis','km','baujahr','leistung','kraftstoff','getriebe','hu','beschreibung'].forEach(k=>fd.append(k,$(k).value));
-  const keep=[...document.querySelectorAll('#keep span')].map(s=>s.dataset.f).join(',');
-  fd.append('keepBilder',keep);
-  [...$('bilder').files].forEach(f=>fd.append('bilder',f));
-  const id=$('fid').value;
-  const r=await fetch(id?'/api/cars/'+id:'/api/cars',{method:id?'PUT':'POST',headers:{'x-admin-key':TOKEN},body:fd});
-  if(r.status===401){alert('Session abgelaufen — neu einloggen');localStorage.removeItem('aw_token');location.reload();return;}
-  if(!r.ok){alert('Fehler: '+(await r.text()));return;}
-  $('f').reset();$('fid').value='';$('keep').innerHTML='';$('bilder').value='';$('form-title').textContent='Neues Inserat';load();
+  const btn=$('save-btn'), st=$('save-status');
+  btn.disabled=true; const oldT=btn.textContent; btn.textContent='Wird gespeichert …'; st.textContent='';
+  try{
+    const fd=new FormData();
+    ['titel','preis','km','baujahr','leistung','kraftstoff','getriebe','hu','beschreibung'].forEach(k=>fd.append(k,$(k).value));
+    const keep=[...document.querySelectorAll('#keep span')].map(s=>s.dataset.f).join(',');
+    fd.append('keepBilder',keep);
+    [...$('bilder').files].forEach(f=>fd.append('bilder',f));
+    const id=$('fid').value;
+    const r=await fetch(id?'/api/cars/'+id:'/api/cars',{method:id?'PUT':'POST',headers:{'x-admin-key':TOKEN},body:fd});
+    if(r.status===401){alert('Session abgelaufen — neu einloggen');localStorage.removeItem('aw_token');location.reload();return;}
+    if(!r.ok){st.style.color='#E63312'; st.textContent='Fehler: '+(await r.text()); return;}
+    $('f').reset();$('fid').value='';$('keep').innerHTML='';$('bilder').value='';$('form-title').textContent='Neues Inserat';
+    st.style.color='#0a7a2f'; st.textContent='Gespeichert ✓';
+    await load();
+    $('cnt').scrollIntoView({behavior:'smooth',block:'center'});
+  }finally{btn.disabled=false; btn.textContent=oldT;}
 };
 function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 </script>

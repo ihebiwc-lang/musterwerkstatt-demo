@@ -51,6 +51,7 @@ function rowToCar(row) {
     bilder,
     bilderUrls: bilder.map((f) => '/uploads/' + f),
     erstelltAm: row.erstelltAm,
+    status: row.status || 'aktiv',
   };
 }
 
@@ -72,6 +73,33 @@ async function storeUploads(env, files) {
     names.push(key);
   }
   return names;
+}
+
+function berlinNow() {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Europe/Berlin', year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', hour12: false,
+  }).formatToParts(new Date());
+  const p = {};
+  for (const x of parts) p[x.type] = x.value;
+  return { date: p.year + '-' + p.month + '-' + p.day, time: p.hour + ':' + p.minute };
+}
+
+async function sweepTermine(env) {
+  const now = berlinNow();
+  const { results } = await env.DB.prepare(
+    "SELECT * FROM termine WHERE datum < ? OR (datum = ? AND uhrzeit != '' AND uhrzeit <= ?)"
+  ).bind(now.date, now.date, now.time).all();
+  const rows = results || [];
+  const stamp = new Date().toISOString();
+  for (const t of rows) {
+    const aid = 'arc-' + Date.now() + '-' + Math.round(Math.random() * 1e6);
+    await env.DB.prepare(
+      'INSERT INTO archiv (id, typ, titel, payload, erstelltAm, archiviertAm) VALUES (?, ?, ?, ?, ?, ?)'
+    ).bind(aid, 'termin-abgelaufen', (t.name || '') + ' · ' + (t.datum || '') + ' ' + (t.uhrzeit || ''), JSON.stringify(t), t.erstelltAm || '', stamp).run();
+    await env.DB.prepare('DELETE FROM termine WHERE id = ?').bind(t.id).run();
+  }
+  return rows.length;
 }
 
 export default {
@@ -111,6 +139,7 @@ export default {
 
     // ---- API: free/busy slots for a date (public, times only) ----
     if (path === '/api/slots' && method === 'GET') {
+      await sweepTermine(env);
       const datum = String(url.searchParams.get('datum') || '').slice(0, 10);
       if (!/^\d{4}-\d{2}-\d{2}$/.test(datum)) return json([]);
       const { results } = await env.DB.prepare(
@@ -121,6 +150,7 @@ export default {
 
     // ---- API: Termine (booking requests) ----
     if (path === '/api/termine' && method === 'POST') {
+      await sweepTermine(env);
       let b = null;
       try { b = await request.json(); } catch { b = null; }
       if (!b) return json({ error: 'Ungültige Daten' }, 400);
@@ -160,6 +190,7 @@ export default {
       if (request.headers.get('x-admin-key') !== env.ADMIN_PASSWORD) {
         return json({ error: 'Unauthorized' }, 401);
       }
+      await sweepTermine(env);
       const { results } = await env.DB.prepare(
         'SELECT * FROM termine ORDER BY erstelltAm DESC'
       ).all();
@@ -175,10 +206,10 @@ export default {
       return json({ ok: true });
     }
 
-    // ---- API: list ----
+    // ---- API: list (public: only aktiv) ----
     if (path === '/api/cars' && method === 'GET') {
       const { results } = await env.DB.prepare(
-        'SELECT * FROM cars ORDER BY erstelltAm DESC'
+        "SELECT * FROM cars WHERE status = 'aktiv' ORDER BY erstelltAm DESC"
       ).all();
       return json((results || []).map(rowToCar));
     }
@@ -218,7 +249,7 @@ export default {
       const id = decodeURIComponent(m[1]);
       if (method === 'GET') {
         const row = await env.DB.prepare('SELECT * FROM cars WHERE id = ?').bind(id).first();
-        if (!row) return json({ error: 'Nicht gefunden' }, 404);
+        if (!row || (row.status || 'aktiv') !== 'aktiv') return json({ error: 'Nicht gefunden' }, 404);
         return json(rowToCar(row));
       }
       if (request.headers.get('x-admin-key') !== env.ADMIN_PASSWORD) {
@@ -228,6 +259,10 @@ export default {
       if (!row) return json({ error: 'Nicht gefunden' }, 404);
 
       if (method === 'DELETE') {
+        const gone = rowToCar(row);
+        await env.DB.prepare(
+          'INSERT INTO archiv (id, typ, titel, payload, erstelltAm, archiviertAm) VALUES (?, ?, ?, ?, ?, ?)'
+        ).bind('arc-' + Date.now(), 'auto-gelöscht', gone.titel, JSON.stringify(gone), gone.erstelltAm, new Date().toISOString()).run();
         await env.DB.prepare('DELETE FROM cars WHERE id = ?').bind(id).run();
         for (const k of rowToCar(row).bilder) {
           try { await env.UPLOADS.delete(k); } catch { /* ignore */ }
@@ -261,6 +296,68 @@ export default {
         const updated = await env.DB.prepare('SELECT * FROM cars WHERE id = ?').bind(id).first();
         return json(rowToCar(updated));
       }
+    }
+
+    // ---- API: admin cars (all statuses) ----
+    if (path === '/api/admin/cars' && method === 'GET') {
+      if (request.headers.get('x-admin-key') !== env.ADMIN_PASSWORD) {
+        return json({ error: 'Unauthorized' }, 401);
+      }
+      const { results } = await env.DB.prepare(
+        'SELECT * FROM cars ORDER BY erstelltAm DESC'
+      ).all();
+      return json((results || []).map(rowToCar));
+    }
+
+    // ---- API: car status (aktiv / versteckt / verkauft) ----
+    const mst = /^\/api\/cars\/([^/]+)\/status$/.exec(path);
+    if (mst && method === 'POST') {
+      if (request.headers.get('x-admin-key') !== env.ADMIN_PASSWORD) {
+        return json({ error: 'Unauthorized' }, 401);
+      }
+      let status = '';
+      try { status = (await request.json())?.status || ''; } catch { /* ignore */ }
+      if (!['aktiv', 'versteckt', 'verkauft'].includes(status)) {
+        return json({ error: 'Unbekannter Status' }, 400);
+      }
+      const srow = await env.DB.prepare('SELECT * FROM cars WHERE id = ?').bind(decodeURIComponent(mst[1])).first();
+      if (!srow) return json({ error: 'Nicht gefunden' }, 404);
+      if (status === 'verkauft') {
+        const car = rowToCar(srow);
+        await env.DB.prepare(
+          'INSERT INTO archiv (id, typ, titel, payload, erstelltAm, archiviertAm) VALUES (?, ?, ?, ?, ?, ?)'
+        ).bind('arc-' + Date.now(), 'auto-verkauft', car.titel, JSON.stringify(car), car.erstelltAm, new Date().toISOString()).run();
+      }
+      await env.DB.prepare('UPDATE cars SET status = ? WHERE id = ?').bind(status, srow.id).run();
+      const updated = await env.DB.prepare('SELECT * FROM cars WHERE id = ?').bind(srow.id).first();
+      return json(rowToCar(updated));
+    }
+
+    // ---- API: archiv / journal ----
+    if (path === '/api/archiv' && method === 'GET') {
+      if (request.headers.get('x-admin-key') !== env.ADMIN_PASSWORD) {
+        return json({ error: 'Unauthorized' }, 401);
+      }
+      await sweepTermine(env);
+      const { results } = await env.DB.prepare(
+        'SELECT * FROM archiv ORDER BY archiviertAm DESC'
+      ).all();
+      return json(results || []);
+    }
+    if (path === '/api/archiv' && method === 'DELETE') {
+      if (request.headers.get('x-admin-key') !== env.ADMIN_PASSWORD) {
+        return json({ error: 'Unauthorized' }, 401);
+      }
+      await env.DB.prepare('DELETE FROM archiv').run();
+      return json({ ok: true });
+    }
+    const marc = /^\/api\/archiv\/([^/]+)$/.exec(path);
+    if (marc && method === 'DELETE') {
+      if (request.headers.get('x-admin-key') !== env.ADMIN_PASSWORD) {
+        return json({ error: 'Unauthorized' }, 401);
+      }
+      await env.DB.prepare('DELETE FROM archiv WHERE id = ?').bind(decodeURIComponent(marc[1])).run();
+      return json({ ok: true });
     }
 
     // ---- everything else: static frontend ----

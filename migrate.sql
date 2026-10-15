@@ -1,0 +1,9 @@
+ALTER TABLE cars ADD COLUMN status TEXT NOT NULL DEFAULT 'aktiv';
+CREATE TABLE IF NOT EXISTS archiv (
+  id TEXT PRIMARY KEY,
+  typ TEXT NOT NULL,
+  titel TEXT NOT NULL DEFAULT '',
+  payload TEXT NOT NULL DEFAULT '{}',
+  erstelltAm TEXT NOT NULL DEFAULT '',
+  archiviertAm TEXT NOT NULL DEFAULT ''
+);

@@ -11,7 +11,7 @@ All branding, addresses and contacts are placeholders (`Musterstadt`).
 - **Landing page** — services, fixed-price list, contact cards, custom date picker + hourly booking slots
 - **Fahrzeuge** — inline section on the homepage (3 latest + show more, expandable details) plus full listings page with search, filters, sorting, detail dialog with animated photo viewer (zoom, pan, prev/next)
 - **Online-Terminbuchung** — 8–18h hourly slots, busy times shown live, double-booking protection, one appointment per phone number per day
-- **Hidden admin panel** — vehicle CRUD with photo upload, booking requests inbox (opens via double-Shift, password protected)
+- **Hidden admin panel** — vehicle CRUD with photo upload, visibility statuses (active/hidden/sold), booking requests inbox, archive journal for sold/deleted cars and expired bookings (opens via double-Shift, password protected)
 - **Legal pages** — Impressum + Datenschutz templates, cookie-free, self-hosted fonts, alt texts
 
 ## Stack
@@ -31,6 +31,7 @@ public/            static frontend (index, fahrzeuge, admin, impressum, datensch
 src/worker.js      API: /api/cars, /api/termine, /api/slots, /api/login + static assets
 schema.sql         cars table (D1)
 termine.sql        bookings table (D1)
+migrate.sql        statuses + archive journal tables (D1)
 seed.sql           demo vehicles
 wrangler.jsonc    Worker + D1 + KV + assets config
 ```
