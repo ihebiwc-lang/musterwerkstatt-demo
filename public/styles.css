@@ -95,9 +95,8 @@ footer a{color:#fff}
 .mob-bar{display:none}
 @media(max-width:900px){
   .hero-grid,.grid3,.cars,.foot-grid{grid-template-columns:1fr}
-  nav.main{width:100%; flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:thin}
+  nav.main{width:100%; flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:thin; padding-right:10px}
   nav.main a{padding:8px 10px; font-size:12px; white-space:nowrap; flex:1; text-align:center}
-  nav.main a:last-child{margin-right:10px}
   nav.main a.nav-t{display:none}
   .topbar{padding:8px 0; gap:8px}
   .logo{gap:8px; margin-left:4px}
