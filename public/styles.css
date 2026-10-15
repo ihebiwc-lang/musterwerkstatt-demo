@@ -91,11 +91,28 @@ footer{background:#111; color:#eee; border-top:var(--line); margin-top:20px}
 footer h3{color:var(--yellow); font-size:16px; margin-bottom:10px}
 footer a{color:#fff}
 .bottom{border-top:1px solid #333; padding:12px 0; font-family:ui-monospace,monospace; font-size:12px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px}
+.mob-bar{display:none}
 @media(max-width:900px){
   .hero-grid,.grid3,.cars,.foot-grid{grid-template-columns:1fr}
   nav.main{width:100%}
   .tel{display:none}
   .gallery{grid-template-columns:1fr 1fr}
+  .hero{padding:36px 0 0}
+  .sec-head{flex-wrap:wrap; gap:8px}
+  .form-grid{grid-template-columns:1fr}
+  .slots{grid-template-columns:repeat(3,1fr)}
+  .slot{padding:12px 0; font-size:15px}
+  input,select,textarea{font-size:16px}
+  .small-btn{padding:10px 14px}
+  .mob-bar{display:flex; gap:8px; position:fixed; left:0; right:0; bottom:0; z-index:55; padding:10px 12px calc(10px + env(safe-area-inset-bottom)); background:rgba(246,244,236,.97); border-top:var(--line)}
+  .mob-bar .btn{flex:1; text-align:center; padding:13px 8px; font-size:14px}
+  body:has(.mob-bar){padding-bottom:78px}
+}
+@media(max-width:520px){
+  .meta{grid-template-columns:1fr}
+  .meta div:nth-child(odd){border-right:none; border-bottom:none; padding-bottom:2px}
+  .meta div:nth-child(even){padding-top:2px}
+  .dp{width:calc(100vw - 60px)}
 }
 .gallery img{cursor:zoom-in}
 #admin-fab{position:fixed; bottom:18px; right:18px; z-index:60; animation:vw-pop .18s ease-out}
