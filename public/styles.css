@@ -126,3 +126,4 @@ footer a{color:#fff}
 .vw-stage img{max-width:100%; max-height:70vh; object-fit:contain; cursor:zoom-in; will-change:transform; -webkit-user-drag:none}
 .vw-bar{display:flex; gap:8px; align-items:center; padding:10px 14px; border-top:var(--line); background:#1a1a1a; flex-wrap:wrap}
 .vw-bar .sp{flex:1}
+#archiv-fab{position:fixed; bottom:18px; right:18px; z-index:60; box-shadow:4px 4px 0 #111}

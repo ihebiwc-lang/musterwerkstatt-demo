@@ -50,10 +50,14 @@
 <table class="list"><thead><tr><th>Foto</th><th>Titel</th><th>Preis</th><th>KM</th><th>Status</th><th>Aktion</th></tr></thead><tbody id="rows"></tbody></table>
 </div></div>
 
-<div class="card" style="margin-top:16px"><div class="hd"><span>Archiv / Journal</span><span id="a-cnt"></span></div><div class="bd" style="overflow-x:auto">
+<button class="btn" id="archiv-fab">Journal 📋 <span id="a-cnt">0</span></button>
+<dialog id="archiv-dlg" style="max-width:920px">
+<div class="modal-hd"><span>Archiv / Journal</span><button class="small-btn" id="archiv-x">Schließen ✕</button></div>
+<div class="modal-bd" style="overflow-x:auto">
 <p><button class="small-btn del" id="archiv-clear">Journal leeren</button></p>
 <table class="list"><thead><tr><th>Typ</th><th>Eintrag</th><th>Archiviert</th><th>Aktion</th></tr></thead><tbody id="a-rows"></tbody></table>
-</div></div>
+</div>
+</dialog>
 
 <div class="card" style="margin-top:16px"><div class="hd"><span>Termin-Anfragen</span><span id="t-cnt"></span></div><div class="bd" style="overflow-x:auto">
 <table class="list"><thead><tr><th>Wunsch</th><th>Name</th><th>Telefon</th><th>Leistung</th><th>Nachricht</th><th>Aktion</th></tr></thead><tbody id="t-rows"></tbody></table>
@@ -125,7 +129,7 @@ window.delCar=async id=>{
 };
 async function loadArchiv(){
   const r=await fetch('/api/archiv',{headers:{'x-admin-key':TOKEN}}); const A=await r.json();
-  $('a-cnt').textContent=A.length+' STK';
+  $('a-cnt').textContent=A.length;
   $('a-rows').innerHTML=A.map(a=>{
     let info='';
     try{
@@ -141,6 +145,8 @@ window.delArchiv=async id=>{
   await fetch('/api/archiv/'+id,{method:'DELETE',headers:{'x-admin-key':TOKEN}});
   loadArchiv();
 };
+$('archiv-fab').onclick=()=>$('archiv-dlg').showModal();
+$('archiv-x').onclick=()=>$('archiv-dlg').close();
 $('archiv-clear').onclick=async()=>{
   if(!confirm('Ganzes Journal löschen?'))return;
   await fetch('/api/archiv',{method:'DELETE',headers:{'x-admin-key':TOKEN}});
@@ -162,9 +168,8 @@ $('f').onsubmit=async e=>{
     if(r.status===401){alert('Session abgelaufen — neu einloggen');localStorage.removeItem('aw_token');location.reload();return;}
     if(!r.ok){st.style.color='#E63312'; st.textContent='Fehler: '+(await r.text()); return;}
     $('f').reset();$('fid').value='';$('keep').innerHTML='';$('bilder').value='';$('form-title').textContent='Neues Inserat';
-    st.style.color='#0a7a2f'; st.textContent='Gespeichert ✓';
-    await load();
-    $('cnt').scrollIntoView({behavior:'smooth',block:'center'});
+    st.style.color='#0a7a2f'; st.textContent='Gespeichert ✓ — Seite wird neu geladen …';
+    setTimeout(()=>location.reload(),900);
   }finally{btn.disabled=false; btn.textContent=oldT;}
 };
 function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
