@@ -21,7 +21,8 @@ header.top{position:sticky; top:0; z-index:50; background:var(--paper); border-b
 .logo b{font-family:"Archivo Black",Arial,sans-serif; font-size:18px; text-transform:uppercase}
 .logo small{display:block; font-family:ui-monospace,monospace; font-size:11px; letter-spacing:.14em}
 nav.main{display:flex; gap:2px; flex-wrap:wrap}
-nav.main a{text-decoration:none; font-weight:800; font-size:13px; text-transform:uppercase; letter-spacing:.06em; padding:10px 14px; border:var(--line); background:#fff; margin-left:-2px}
+nav.main a{text-decoration:none; font-weight:800; font-size:13px; text-transform:uppercase; letter-spacing:.06em; padding:10px 14px; border:var(--line); background:#fff}
+nav.main a+a{margin-left:-2px}
 nav.main a.active,nav.main a:hover{background:var(--yellow)}
 .tel{font-family:ui-monospace,monospace; font-weight:700; border:var(--line); background:#111; color:#fff; padding:10px 14px; text-decoration:none; box-shadow:3px 3px 0 var(--yellow)}
 .hero{border-bottom:var(--line); background:var(--paper); padding:56px 0 0; overflow:hidden}
@@ -96,6 +97,7 @@ footer a{color:#fff}
   .hero-grid,.grid3,.cars,.foot-grid{grid-template-columns:1fr}
   nav.main{width:100%; flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:thin}
   nav.main a{padding:8px 10px; font-size:12px; white-space:nowrap; flex:1; text-align:center}
+  nav.main a:last-child{margin-right:6px}
   nav.main a.nav-t{display:none}
   .topbar{padding:8px 0; gap:8px}
   .logo{gap:8px}
