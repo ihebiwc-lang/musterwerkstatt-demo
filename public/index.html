@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Musterwerkstatt — Musterstraße 1A | Reparatur & Service</title>
+<meta name="description" content="Freie Musterwerkstatt in Musterstadt: Inspektion, Bremsen, Reifen, Diagnose, HU/AU-Vorbereitung. Musterstraße 1A, 12345 Musterstadt.">
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div class="hazard"></div>
+<header class="top">
+  <div class="wrap topbar">
+    <a class="logo" href="/"><span class="logo-mark">MW</span><span><b>Musterwerkstatt</b><small>MUSTERSTR. 1A — 12345 MUSTERSTADT</small></span></a>
+    <nav class="main">
+      <a href="/" class="active">Werkstatt</a>
+      <a href="/fahrzeuge.html">Fahrzeuge</a>
+      <a href="/#termin">Termin</a>
+    </nav>
+    <a class="tel" href="tel:+490000000000">0000 / 000 000</a>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="kicker">Freie Werkstatt · Musterstadt · seit 2009</span>
+    <h1>Repariert.<br><span>Kein Gelaber.</span></h1>
+    <p class="lead">Inspektion, Bremsen, Reifen, Diagnose, HU/AU-Vorbereitung. Festpreis vorher, Protokoll nachher. Für alles was rollt — vom Kleinwagen bis Transporter.</p>
+    <div class="hero-grid">
+      <div class="card">
+        <div class="hd"><span>Direkt-Termin</span><span>Mo–Fr 8–18</span></div>
+        <div class="bd">
+          <div class="meta">
+            <div>Adresse</div><div><b>Musterstraße 1A, 12345 Musterstadt</b></div>
+            <div>Telefon</div><div><a href="tel:+490000000000"><b>0000 / 000 000</b></a></div>
+            <div>HU/AU</div><div>Jeden <b>Di + Do</b> im Haus (mit Partner-Prüfer)</div>
+            <div>Ersatzwagen</div><div>Ab 15 € / Tag — bitte vorab reservieren</div>
+          </div>
+          <p style="margin-top:14px"><a class="btn" href="tel:+490000000000">Jetzt anrufen</a> <a class="btn ghost" href="/fahrzeuge.html">Fahrzeuge ansehen →</a></p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="hd"><span>Festpreis-Beispiele</span><span>inkl. MwSt.</span></div>
+        <div class="bd">
+          <div class="meta">
+            <div>Ölservice</div><div>ab <b>89 €</b></div>
+            <div>Bremsen vorn</div><div>ab <b>189 €</b></div>
+            <div>Reifenwechsel</div><div>ab <b>39 €</b></div>
+            <div>Diagnose</div><div><b>29 €</b> (bei Auftrag gratis)</div>
+          </div>
+          <p class="mono" style="font-size:12px; color:#5c5c55; margin:12px 0 0">Alle Preise ca., je nach Modell. Kostenvoranschlag immer gratis.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="hazard"></div>
+</div>
+
+<section class="block" id="termin">
+  <div class="wrap">
+    <div class="sec-head"><h2>Termin anfragen</h2><span class="num">Antwort am selben Tag</span></div>
+    <div class="card"><div class="hd"><span>Wunsch-Termin</span><span>Mo–Fr 8–18</span></div><div class="bd">
+    <form id="t-form">
+      <div class="form-grid">
+        <div><label>Name *</label><input type="text" id="t-name" required maxlength="80" placeholder="Max Mustermann"></div>
+        <div><label>Telefon *</label><input type="tel" id="t-tel" required maxlength="40" placeholder="0151 …"></div>
+        <div style="position:relative"><label>Wunsch-Datum</label><input type="text" id="t-date-show" readonly placeholder="Datum wählen …"><input type="hidden" id="t-date">
+        <div class="dp" id="dp"><div class="dp-hd"><button type="button" class="small-btn" id="dp-prev">←</button><b id="dp-title"></b><button type="button" class="small-btn" id="dp-next">→</button></div><div class="dp-grid dp-dow"><span>Mo</span><span>Di</span><span>Mi</span><span>Do</span><span>Fr</span><span>Sa</span><span>So</span></div><div class="dp-grid" id="dp-days"></div></div></div>
+        <div><label>Uhrzeit * (jede volle Stunde, 8–18 Uhr)</label><input type="hidden" id="t-time"><div class="slots" id="t-slots"></div><div class="mono" style="font-size:11px; margin-top:6px">gelb = gewählt · <span style="text-decoration:line-through">durchgestrichen</span> = belegt</div></div>
+      </div>
+      <label>Leistung</label>
+      <select id="t-svc"><option>Inspektion & Service</option><option>Bremsen & Fahrwerk</option><option>Reifen & Räder</option><option>Diagnose & Elektrik</option><option>HU/AU Vorbereitung</option><option>Klima & Zahnriemen</option><option>Sonstiges</option></select>
+      <label>Nachricht (Auto + Problem kurz beschreiben)</label>
+      <textarea id="t-msg" maxlength="500" placeholder="z.B. Golf 7, Bremsen quietschen vorne…"></textarea>
+      <label class="t-check"><input type="checkbox" id="t-privacy" required> Ich stimme der Verarbeitung meiner Daten zur Terminvereinbarung zu (<a href="/datenschutz.html" target="_blank" rel="noopener">Datenschutz</a>).</label>
+      <p style="margin-top:14px"><button class="btn" type="submit">Anfrage senden</button></p>
+      <p id="t-status" style="font-weight:700"></p>
+    </form>
+    </div></div>
+  </div>
+</section>
+
+<section class="block">
+  <div class="wrap">
+    <div class="sec-head"><h2>Leistungen</h2><span class="num">01 / 06</span></div>
+    <div class="grid3">
+      <div class="svc"><h3>01 — Inspektion & Service</h3><p>Nach Herstellervorgabe, mit Original- oder OEM-Teilen. Mobilitätsgarantie bleibt erhalten.</p><div class="price">ab 149 €</div></div>
+      <div class="svc"><h3>02 — Bremsen & Fahrwerk</h3><p>Scheiben, Beläge, Stoßdämpfer, Achsvermessung. Mit Bremsprüfstand-Protokoll.</p><div class="price">ab 189 €</div></div>
+      <div class="svc"><h3>03 — Reifen & Räder</h3><p>Wechsel, Wuchten, Einlagerung, Achsvermessung. Alle Marken, auch Allwetter.</p><div class="price">ab 39 €</div></div>
+      <div class="svc"><h3>04 — Diagnose & Elektrik</h3><p>Fehlerspeicher, Batterie, Lichtmaschine, Anlasser. Markenübergreifende Tester.</p><div class="price">29 €</div></div>
+      <div class="svc"><h3>05 — HU/AU Vorbereitung</h3><p>Vorcheck + Vorführung beim Prüfer Di/Do. Keine Nachprüfung = kein Stress.</p><div class="price">ab 59 € + Gebühr</div></div>
+      <div class="svc"><h3>06 — Klima & Zahnriemen</h3><p>Klimaservice, Zahnriemen + Wasserpumpe, Steuerkette. Mit Festpreis-Garantie.</p><div class="price">auf Anfrage</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="block" style="background:#111; color:#eee; border-top:2px solid #111; border-bottom:2px solid #111">
+  <div class="wrap">
+    <div class="sec-head"><h2 style="color:#FFD400">So läuft's</h2><span class="num">ohne Kleingedrucktes</span></div>
+    <div class="grid3">
+      <div class="svc" style="background:#1a1a1a; color:#eee; border-color:#FFD400"><h3 style="background:#111; color:#FFD400; border-color:#FFD400">1. Anruf</h3><p>Symptom schildern, Termin in 24–48h. Ersatzwagen sichern.</p></div>
+      <div class="svc" style="background:#1a1a1a; color:#eee; border-color:#FFD400"><h3 style="background:#111; color:#FFD400; border-color:#FFD400">2. Festpreis</h3><p>Check + Kostenvoranschlag. Kein Auftrag ohne dein OK.</p></div>
+      <div class="svc" style="background:#1a1a1a; color:#eee; border-color:#FFD400"><h3 style="background:#111; color:#FFD400; border-color:#FFD400">3. Protokoll</h3><p>Alt-Teile zurück, Rechnung mit Arbeitswerten, 12 Monate Gewähr.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="block">
+  <div class="wrap">
+    <div class="sec-head"><h2>Frisch im Verkauf</h2><a class="btn ghost" href="/fahrzeuge.html">Alle Fahrzeuge →</a></div>
+    <div class="cars" id="home-cars"></div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-grid">
+    <div><h3>Musterwerkstatt</h3><p>Musterstraße 1A<br>12345 Musterstadt<br><a href="tel:+490000000000">0000 / 000 000</a><br><a href="mailto:info@musterwerkstatt.de">info@musterwerkstatt.de</a></p></div>
+    <div><h3>Zeiten</h3><p>Mo–Fr: 08:00–18:00<br>Sa: nach Vereinbarung<br>HU/AU: Di + Do</p></div>
+    <div><h3>Kurz</h3><p><a href="/fahrzeuge.html">Fahrzeuge</a><br><a href="/impressum.html">Impressum</a><br><a href="/datenschutz.html">Datenschutz</a><br><a href="https://maps.google.com/?q=Musterstraße+1A+12345+Musterstadt" target="_blank" rel="noopener">Route planen →</a></p></div>
+  </div>
+  <div class="bottom wrap"><span>© 2026 Musterwerkstatt — Musterstraße 1A</span><span><a href="/impressum.html">Impressum</a> · <a href="/datenschutz.html">Datenschutz</a></span></div>
+</footer>
+<script>
+fetch('/api/cars').then(r=>r.json()).then(cars=>{
+  const el=document.getElementById('home-cars');
+  el.innerHTML=cars.slice(0,3).map(carCard).join('') || '<p>Gerade alles verkauft — frag nach, Nachschub kommt wöchentlich.</p>';
+});
+function fmt(n){return Number(n||0).toLocaleString('de-DE')+' €'}
+function fmtKm(n){return Number(n||0).toLocaleString('de-DE')+' km'}
+function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function carCard(c){
+  const img=(c.bilderUrls&&c.bilderUrls[0])?`<img src="${c.bilderUrls[0]}" alt="${esc(c.titel)}" loading="lazy">`:'WERKSTATT<br>GEPRÜFT';
+  return `<div class="car"><div class="car-img">${img}<span class="km-badge">${fmtKm(c.km)} · ${c.baujahr}</span></div>
+  <div class="car-body"><h3>${esc(c.titel)}</h3><div class="specs"><span>${c.kraftstoff}</span><span>${c.getriebe}</span><span>${c.leistung} PS</span></div>
+  <div class="price-row"><span class="price">${fmt(c.preis)}</span><a class="small-btn edit" href="/fahrzeuge.html">Details</a></div></div></div>`;
+}
+const DP_MON=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+const DP_WD=['So','Mo','Di','Mi','Do','Fr','Sa'];
+const p2=n=>String(n).padStart(2,'0');
+let DP_CUR=new Date(); DP_CUR.setDate(1); DP_CUR.setHours(0,0,0,0);
+let DP_VAL='';
+function dpRender(){
+  const y=DP_CUR.getFullYear(), m=DP_CUR.getMonth();
+  document.getElementById('dp-title').textContent=DP_MON[m]+' '+y;
+  const first=(new Date(y,m,1).getDay()+6)%7, dim=new Date(y,m+1,0).getDate();
+  const today=new Date(); today.setHours(0,0,0,0);
+  let h='';
+  for(let i=0;i<first;i++)h+='<span></span>';
+  for(let d=1;d<=dim;d++){
+    const iso=y+'-'+p2(m+1)+'-'+p2(d);
+    const dt=new Date(y,m,d);
+    const dis=dt<today||dt.getDay()===0;
+    h+='<button type="button" class="dp-day'+(iso===DP_VAL?' sel':'')+(dt.getTime()===today.getTime()?' today':'')+'" data-d="'+iso+'"'+(dis?' disabled':'')+'>'+d+'</button>';
+  }
+  document.getElementById('dp-days').innerHTML=h;
+}
+function dpPick(iso){
+  DP_VAL=iso; document.getElementById('t-date').value=iso;
+  const p=iso.split('-'), dt=new Date(+p[0],+p[1]-1,+p[2]);
+  document.getElementById('t-date-show').value=DP_WD[dt.getDay()]+', '+p[2]+'.'+p[1]+'.'+p[0];
+  document.getElementById('dp').classList.remove('open'); dpRender();
+  SLOT_VAL=''; document.getElementById('t-time').value=''; slotRender();
+}
+document.getElementById('t-date-show').addEventListener('click',e=>{e.stopPropagation(); dpRender(); document.getElementById('dp').classList.toggle('open');});
+document.getElementById('dp-days').addEventListener('click',e=>{const b=e.target.closest('button[data-d]'); if(b&&!b.disabled)dpPick(b.dataset.d);});
+document.getElementById('dp-prev').addEventListener('click',e=>{e.stopPropagation(); const t=new Date(); t.setDate(1); t.setHours(0,0,0,0); const n=new Date(DP_CUR.getFullYear(),DP_CUR.getMonth()-1,1); if(n>=t){DP_CUR=n; dpRender();}});
+document.getElementById('dp-next').addEventListener('click',e=>{e.stopPropagation(); DP_CUR=new Date(DP_CUR.getFullYear(),DP_CUR.getMonth()+1,1); dpRender();});
+document.getElementById('dp').addEventListener('click',e=>e.stopPropagation());
+document.addEventListener('click',()=>document.getElementById('dp').classList.remove('open'));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('dp').classList.remove('open');});
+// time slots 08:00–17:00, occupied shown from server
+const SLOT_HOURS=[8,9,10,11,12,13,14,15,16,17];
+let SLOT_VAL='';
+const localISO=d=>d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate());
+async function slotRender(){
+  const box=document.getElementById('t-slots');
+  const datum=document.getElementById('t-date').value;
+  if(!datum){box.innerHTML='<span class="mono" style="font-size:12px">↑ erst Datum wählen</span>';return;}
+  box.innerHTML='<span class="mono" style="font-size:12px">Lade …</span>';
+  let busy=[]; try{busy=await (await fetch('/api/slots?datum='+encodeURIComponent(datum))).json();}catch(e){busy=[];}
+  if(!Array.isArray(busy))busy=[];
+  const now=new Date(), isToday=datum===localISO(now);
+  let h='';
+  for(const hh of SLOT_HOURS){
+    const t=p2(hh)+':00';
+    const taken=busy.includes(t);
+    const past=isToday&&hh<=now.getHours();
+    const dis=taken||past;
+    h+='<button type="button" class="slot'+(t===SLOT_VAL?' sel':'')+(taken?' belegt':'')+'" data-t="'+t+'"'+(dis?' disabled':'')+'>'+t+'</button>';
+  }
+  box.innerHTML=h;
+}
+document.getElementById('t-slots').addEventListener('click',e=>{
+  const b=e.target.closest('button[data-t]'); if(!b||b.disabled)return;
+  SLOT_VAL=b.dataset.t; document.getElementById('t-time').value=SLOT_VAL; slotRender();
+});
+slotRender();
+document.getElementById('t-form').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const st=document.getElementById('t-status');
+  const body={
+    name:document.getElementById('t-name').value,
+    telefon:document.getElementById('t-tel').value,
+    datum:document.getElementById('t-date').value,
+    uhrzeit:document.getElementById('t-time').value,
+    leistung:document.getElementById('t-svc').value,
+    nachricht:document.getElementById('t-msg').value
+  };
+  st.style.color='#111'; st.textContent='Wird gesendet …';
+  if(!document.getElementById('t-time').value){st.style.color='#E63312'; st.textContent='Bitte Uhrzeit wählen.'; return;}
+  try{
+    const r=await fetch('/api/termine',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    if(!r.ok){const d=await r.json().catch(()=>({})); throw new Error(d.error||('Fehler '+r.status));}
+    st.style.color='#0a7a2f'; st.textContent='Danke! Wir melden uns am selben Tag. Direkt: 0000 / 000 000';
+    document.getElementById('t-form').reset();
+  }catch(err){st.style.color='#E63312'; st.textContent=String(err.message||err);}
+});
+// hidden admin: double-shift shows button
+let SH_LAST=0;
+document.addEventListener('keydown',e=>{
+  if(e.key==='Shift'){const t=Date.now(); if(t-SH_LAST<400)showAdminFab(); SH_LAST=t; return;}
+  if(e.key==='Escape'){const f=document.getElementById('admin-fab'); if(f)f.remove();}
+});
+function showAdminFab(){
+  if(document.getElementById('admin-fab'))return;
+  const a=document.createElement('a');
+  a.id='admin-fab'; a.className='btn'; a.href='/admin.html'; a.textContent='Admin 🔧';
+  document.body.appendChild(a);
+  setTimeout(()=>{const f=document.getElementById('admin-fab'); if(f)f.remove();},15000);
+}
+</script>
+</body>
+</html>

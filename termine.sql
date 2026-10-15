@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS termine (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  telefon TEXT NOT NULL,
+  datum TEXT NOT NULL DEFAULT '',
+  uhrzeit TEXT NOT NULL DEFAULT '',
+  leistung TEXT NOT NULL DEFAULT '',
+  nachricht TEXT NOT NULL DEFAULT '',
+  erstelltAm TEXT NOT NULL DEFAULT ''
+);

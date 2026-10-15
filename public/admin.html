@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin / Verkauf — Musterwerkstatt</title>
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div class="hazard"></div>
+<header class="top"><div class="wrap topbar">
+<a class="logo" href="/"><span class="logo-mark">MW</span><span><b>Musterwerkstatt</b><small>ADMIN / VERKAUF</small></span></a>
+<nav class="main"><a href="/">Werkstatt</a><a href="/fahrzeuge.html">Fahrzeuge</a><a href="/admin.html" class="active">Admin</a></nav>
+<button class="tel" id="logout" style="display:none">Logout</button>
+</div></header>
+
+<section class="block"><div class="wrap">
+<div class="sec-head"><h2>Verkauf: Inserate</h2><span class="num">intern</span></div>
+
+<div class="card" id="login-card"><div class="hd"><span>Login</span><span>🔒</span></div><div class="bd" style="max-width:420px">
+<label>Passwort</label><input type="password" id="pw" placeholder="••••••••">
+<p style="margin-top:12px"><button class="btn" id="login-btn">Einloggen</button></p>
+<p id="login-err" style="color:#E63312; font-weight:700"></p>
+</div></div>
+
+<div id="app" style="display:none">
+<div class="card"><div class="hd"><span id="form-title">Neues Inserat</span><span>Preis · KM · Fotos</span></div><div class="bd">
+<form id="f">
+<input type="hidden" id="fid">
+<label>Titel * (z.B. VW Golf 1.6 TDI)</label><input type="text" id="titel" required maxlength="120">
+<div class="form-grid">
+<div><label>Preis € *</label><input type="number" id="preis" required min="1" step="1"></div>
+<div><label>Kilometer *</label><input type="number" id="km" required min="0" step="100"></div>
+<div><label>Baujahr</label><input type="number" id="baujahr" min="1980" max="2026" value="2018"></div>
+<div><label>Leistung (PS)</label><input type="number" id="leistung" min="0" value="110"></div>
+<div><label>Kraftstoff</label><select id="kraftstoff"><option>Benzin</option><option selected>Diesel</option><option>Hybrid</option><option>Elektro</option><option>Gas</option></select></div>
+<div><label>Getriebe</label><select id="getriebe"><option>Schaltgetriebe</option><option>Automatik (DSG)</option><option>Automatik</option></select></div>
+</div>
+<label>HU/AU (z.B. 10/2027)</label><input type="text" id="hu" maxlength="20">
+<label>Beschreibung</label><textarea id="beschreibung" placeholder="Zustand, Historie, Extras, Reifen…"></textarea>
+<label>Fotos (bis 8, max 8MB/Stk) — beim Bearbeiten: neue anhängen, alte per ✕ entfernen</label>
+<input type="file" id="bilder" accept="image/*" multiple>
+<div id="keep" style="margin-top:8px"></div>
+<p style="margin-top:14px"><button class="btn" type="submit">Speichern</button> <button class="btn ghost" type="button" id="reset">Abbrechen</button></p>
+</form></div></div>
+
+<div class="card" style="margin-top:16px"><div class="hd"><span>Alle Inserate</span><span id="cnt"></span></div><div class="bd" style="overflow-x:auto">
+<table class="list"><thead><tr><th>Foto</th><th>Titel</th><th>Preis</th><th>KM</th><th>Bj</th><th>Aktion</th></tr></thead><tbody id="rows"></tbody></table>
+</div></div>
+
+<div class="card" style="margin-top:16px"><div class="hd"><span>Termin-Anfragen</span><span id="t-cnt"></span></div><div class="bd" style="overflow-x:auto">
+<table class="list"><thead><tr><th>Wunsch</th><th>Name</th><th>Telefon</th><th>Leistung</th><th>Nachricht</th><th>Aktion</th></tr></thead><tbody id="t-rows"></tbody></table>
+</div></div>
+</div>
+</div></section>
+
+<script>
+let TOKEN=localStorage.getItem('aw_token')||'';
+let ALL=[];
+const $=id=>document.getElementById(id);
+if(TOKEN){showApp();} 
+$('login-btn').onclick=async()=>{
+  const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:$('pw').value})});
+  if(!r.ok){$('login-err').textContent='Falsches Passwort';return;}
+  const d=await r.json(); TOKEN=d.token; localStorage.setItem('aw_token',TOKEN); showApp();
+};
+$('logout').onclick=()=>{localStorage.removeItem('aw_token'); location.reload();};
+function showApp(){$('login-card').style.display='none';$('app').style.display='block';$('logout').style.display='block';load(); loadTermine();}
+async function loadTermine(){
+  const r=await fetch('/api/termine',{headers:{'x-admin-key':TOKEN}}); const T=await r.json();
+  $('t-cnt').textContent=T.length+' STK';
+  $('t-rows').innerHTML=T.map(t=>`<tr><td><b>${esc(t.datum||'—')} ${esc(t.uhrzeit||'')}</b></td>
+  <td><b>${esc(t.name)}</b></td><td><a href="tel:${esc(t.telefon)}">${esc(t.telefon)}</a></td>
+  <td>${esc(t.leistung||'—')}</td><td style="max-width:220px">${esc(t.nachricht||'—')}</td>
+  <td><div class="row-actions"><button class="small-btn del" onclick="delTermin('${t.id}')">✕</button></div></td></tr>`).join('')||'<tr><td colspan="6">Keine Anfragen.</td></tr>';
+}
+window.delTermin=async id=>{
+  if(!confirm('Anfrage löschen?'))return;
+  await fetch('/api/termine/'+id,{method:'DELETE',headers:{'x-admin-key':TOKEN}});
+  loadTermine();
+};
+async function load(){
+  const r=await fetch('/api/cars'); ALL=await r.json();
+  $('cnt').textContent=ALL.length+' STK';
+  $('rows').innerHTML=ALL.map(c=>`<tr><td>${c.bilderUrls&&c.bilderUrls[0]?`<img class="thumb" alt="${esc(c.titel)}" src="${c.bilderUrls[0]}">`:'—'}</td>
+  <td><b>${esc(c.titel)}</b><br><span class="mono" style="font-size:11px">${esc(c.kraftstoff)} · ${esc(c.getriebe)}</span></td>
+  <td><b>${Number(c.preis).toLocaleString('de-DE')} €</b></td><td>${Number(c.km).toLocaleString('de-DE')}</td><td>${c.baujahr}</td>
+  <td><div class="row-actions"><button class="small-btn edit" onclick="editCar('${c.id}')">Edit</button><button class="small-btn del" onclick="delCar('${c.id}')">✕</button></div></td></tr>`).join('');
+}
+window.editCar=id=>{
+  const c=ALL.find(x=>x.id===id); if(!c)return;
+  $('fid').value=c.id; $('titel').value=c.titel; $('preis').value=c.preis; $('km').value=c.km;
+  $('baujahr').value=c.baujahr; $('leistung').value=c.leistung; $('kraftstoff').value=c.kraftstoff;
+  $('getriebe').value=c.getriebe; $('hu').value=c.hu||''; $('beschreibung').value=c.beschreibung||'';
+  $('form-title').textContent='Bearbeiten: '+c.titel;
+  $('keep').innerHTML=(c.bilder||[]).map(f=>`<span data-f="${f}" style="display:inline-block; position:relative; margin:0 6px 6px 0">
+    <img class="thumb" src="/uploads/${f}"><button type="button" onclick="this.parentElement.remove()" style="position:absolute;top:-8px;right:-8px;border:2px solid #111;background:#E63312;color:#fff;font-weight:900;cursor:pointer">✕</button></span>`).join('');
+  window.scrollTo({top:0,behavior:'smooth'});
+};
+window.delCar=async id=>{
+  if(!confirm('Wirklich löschen?'))return;
+  await fetch('/api/cars/'+id,{method:'DELETE',headers:{'x-admin-key':TOKEN}});
+  load();
+};
+$('reset').onclick=()=>{$('f').reset();$('fid').value='';$('keep').innerHTML='';$('form-title').textContent='Neues Inserat';};
+$('f').onsubmit=async e=>{
+  e.preventDefault();
+  const fd=new FormData();
+  ['titel','preis','km','baujahr','leistung','kraftstoff','getriebe','hu','beschreibung'].forEach(k=>fd.append(k,$(k).value));
+  const keep=[...document.querySelectorAll('#keep span')].map(s=>s.dataset.f).join(',');
+  fd.append('keepBilder',keep);
+  [...$('bilder').files].forEach(f=>fd.append('bilder',f));
+  const id=$('fid').value;
+  const r=await fetch(id?'/api/cars/'+id:'/api/cars',{method:id?'PUT':'POST',headers:{'x-admin-key':TOKEN},body:fd});
+  if(r.status===401){alert('Session abgelaufen — neu einloggen');localStorage.removeItem('aw_token');location.reload();return;}
+  if(!r.ok){alert('Fehler: '+(await r.text()));return;}
+  $('f').reset();$('fid').value='';$('keep').innerHTML='';$('bilder').value='';$('form-title').textContent='Neues Inserat';load();
+};
+function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+</script>
+</body>
+</html>

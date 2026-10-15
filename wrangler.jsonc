@@ -1,0 +1,23 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "autowerkstatt-demmin",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-10-06",
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "werkstatt-db",
+      "database_id": "d26bf47a-69b2-4600-8c1d-ff78982d79da"
+    }
+  ],
+  "kv_namespaces": [
+    {
+      "binding": "UPLOADS",
+      "id": "3ba6ec9b82954740916f6c71922961c3"
+    }
+  ]
+}

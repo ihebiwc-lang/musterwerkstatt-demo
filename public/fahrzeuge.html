@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fahrzeuge — Musterwerkstatt</title>
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div class="hazard"></div>
+<header class="top"><div class="wrap topbar">
+<a class="logo" href="/"><span class="logo-mark">MW</span><span><b>Musterwerkstatt</b><small>MUSTERSTR. 1A — 12345 MUSTERSTADT</small></span></a>
+<nav class="main"><a href="/">Werkstatt</a><a href="/fahrzeuge.html" class="active">Fahrzeuge</a><a href="/#termin">Termin</a></nav>
+<a class="tel" href="tel:+490000000000">0000 / 000 000</a>
+</div></header>
+
+<section class="block"><div class="wrap">
+<div class="sec-head"><h2>Fahrzeuge</h2><span class="num" id="count">…</span></div>
+<p class="mono" style="font-size:13px; text-transform:uppercase; letter-spacing:.08em">Werkstattgeprüft · 12 Monate Gewährleistung · HU/AU neu möglich · Probefahrt nach Absprache</p>
+<div class="filters" style="margin-top:14px">
+<input type="text" id="q" placeholder="Suche: Golf, Diesel, Automatik…" style="flex:2; min-width:200px">
+<select id="fuel"><option value="">Alle Kraftstoffe</option><option>Benzin</option><option>Diesel</option><option>Hybrid</option><option>Elektro</option><option>Gas</option></select>
+<select id="sort"><option value="new">Neueste zuerst</option><option value="cheap">Preis aufsteigend</option><option value="exp">Preis absteigend</option><option value="km">Wenig km zuerst</option></select>
+</div>
+<div class="cars" id="cars"></div>
+</div></section>
+
+<dialog id="dlg"><div class="modal-hd"><span id="dlg-kicker">Fahrzeug</span><button class="small-btn" onclick="document.getElementById('dlg').close()">Schließen ✕</button></div><div class="modal-bd" id="dlg-body"></div></dialog>
+
+<dialog id="viewer">
+  <div class="vw-hd"><span id="vw-count"></span><button class="small-btn" id="vw-x">Schließen ✕</button></div>
+  <div class="vw-stage" id="vw-stage"><img id="vw-img" alt="" draggable="false"></div>
+  <div class="vw-bar">
+    <button class="small-btn" id="vw-prev">← Zurück</button>
+    <button class="small-btn" id="vw-next">Weiter →</button>
+    <span class="sp"></span>
+    <button class="small-btn" id="vw-zout" title="Verkleinern">−</button>
+    <button class="small-btn" id="vw-zreset" title="Zoom zurücksetzen">100%</button>
+    <button class="small-btn" id="vw-zin" title="Vergrößern">+</button>
+  </div>
+</dialog>
+
+<footer><div class="wrap foot-grid">
+<div><h3>Musterwerkstatt</h3><p>Musterstraße 1A<br>12345 Musterstadt<br><a href="tel:+490000000000">0000 / 000 000</a></p></div>
+<div><h3>Zeiten</h3><p>Mo–Fr: 08:00–18:00<br>Sa: nach Vereinbarung</p></div>
+<div><h3>Kurz</h3><p><a href="/">Werkstatt</a><br><a href="/impressum.html">Impressum</a><br><a href="/datenschutz.html">Datenschutz</a></p></div>
+</div><div class="bottom wrap"><span>© 2026 Musterwerkstatt</span><span id="addr"><a href="/impressum.html">Impressum</a> · <a href="/datenschutz.html">Datenschutz</a></span></div></footer>
+
+<script>
+let ALL=[];
+const fmt=n=>Number(n||0).toLocaleString('de-DE')+' €';
+const fmtKm=n=>Number(n||0).toLocaleString('de-DE')+' km';
+fetch('/api/cars').then(r=>r.json()).then(d=>{ALL=d; render();});
+
+function render(){
+  const q=(document.getElementById('q').value||'').toLowerCase();
+  const f=document.getElementById('fuel').value;
+  const s=document.getElementById('sort').value;
+  let list=ALL.filter(c=>(!f||c.kraftstoff===f)&&(!q||(c.titel+' '+c.beschreibung+' '+c.getriebe).toLowerCase().includes(q)));
+  if(s==='cheap')list.sort((a,b)=>a.preis-b.preis);
+  else if(s==='exp')list.sort((a,b)=>b.preis-a.preis);
+  else if(s==='km')list.sort((a,b)=>a.km-b.km);
+  document.getElementById('count').textContent=list.length+' FZG';
+  document.getElementById('cars').innerHTML=list.map(card).join('')||'<p>Nichts gefunden. Ruf an — oft steht was in der Halle, was noch nicht online ist.</p>';
+}
+['q','fuel','sort'].forEach(id=>document.getElementById(id).addEventListener('input',render));
+document.getElementById('q').addEventListener('keyup',render);
+
+function card(c){
+  const img=(c.bilderUrls&&c.bilderUrls[0])?`<img src="${c.bilderUrls[0]}" loading="lazy" alt="${esc(c.titel)}">`:'WERKSTATT<br>GEPRÜFT';
+  return `<div class="car"><div class="car-img">${img}<span class="km-badge">${fmtKm(c.km)} · ${c.baujahr}</span></div>
+  <div class="car-body"><h3>${esc(c.titel)}</h3>
+  <div class="specs"><span>${esc(c.kraftstoff)}</span><span>${esc(c.getriebe)}</span><span>${c.leistung} PS</span><span>HU ${esc(c.hu||'—')}</span></div>
+  <div class="price-row"><span class="price">${fmt(c.preis)}</span><button class="small-btn edit" onclick='openDetail("${c.id}")'>Details</button></div></div></div>`;
+}
+function openDetail(id){
+  const c=ALL.find(x=>x.id===id); if(!c)return;
+  document.getElementById('dlg-kicker').textContent=c.baujahr+' · '+fmtKm(c.km)+' · '+c.kraftstoff;
+  const gal=(c.bilderUrls&&c.bilderUrls.length)?`<div class="gallery">${c.bilderUrls.map((u,i)=>`<img src="${u}" alt="${esc(c.titel)}" data-full="${u}" data-idx="${i}" loading="lazy">`).join('')}</div>`:'<p class="mono">Keine Fotos — komm vorbei, steht in der Halle: Musterstraße 1A.</p>';
+  document.getElementById('dlg-body').innerHTML=`<h3 style="font-size:22px; margin-bottom:8px">${esc(c.titel)}</h3>
+  ${gal}
+  <div class="meta"><div>Preis</div><div><b>${fmt(c.preis)}</b></div><div>Kilometer</div><div>${fmtKm(c.km)}</div>
+  <div>Baujahr</div><div>${c.baujahr}</div><div>Leistung</div><div>${c.leistung} PS</div>
+  <div>Kraftstoff</div><div>${esc(c.kraftstoff)}</div><div>Getriebe</div><div>${esc(c.getriebe)}</div>
+  <div>HU/AU</div><div>${esc(c.hu||'—')}</div></div>
+  <p style="margin:12px 0">${esc(c.beschreibung||'')}</p>
+  <p><a class="btn" href="tel:+490000000000">Anrufen: Probefahrt</a> <a class="btn ghost" href="mailto:info@musterwerkstatt.de?subject=${encodeURIComponent(c.titel)}">Per Mail anfragen</a></p>
+  <p class="mono" style="font-size:12px">Standort: Musterstraße 1A, 12345 Musterstadt · Gewährleistung 12 Monate</p>`;
+  document.getElementById('dlg').showModal();
+}
+function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+// photo viewer: popup on top with animation, zoom + prev/next
+let VW={list:[],i:0,z:1,x:0,y:0};
+const $v=id=>document.getElementById(id);
+function vwApply(){
+  vwClamp();
+  $v('vw-img').style.transform='translate('+VW.x+'px,'+VW.y+'px) scale('+VW.z+')';
+  $v('vw-img').style.cursor=VW.z>1?'grab':'zoom-in';
+  $v('vw-zreset').textContent=Math.round(VW.z*100)+'%';
+  $v('vw-count').textContent=VW.list.length>1?((VW.i+1)+' / '+VW.list.length):'Foto';
+  const multi=VW.list.length>1;
+  $v('vw-prev').style.display=multi?'':'none';
+  $v('vw-next').style.display=multi?'':'none';
+}
+function vwClamp(){
+  const st=$v('vw-stage'), im=$v('vw-img');
+  if(!st||!im||!im.clientWidth)return;
+  const mx=Math.max(0,(im.clientWidth*VW.z-st.clientWidth)/2);
+  const my=Math.max(0,(im.clientHeight*VW.z-st.clientHeight)/2);
+  VW.x=Math.min(mx,Math.max(-mx,VW.x));
+  VW.y=Math.min(my,Math.max(-my,VW.y));
+}
+function vwOpen(list,i){VW={list:list,i:i||0,z:1,x:0,y:0}; $v('vw-img').src=list[VW.i]; vwApply(); const d=$v('viewer'); if(!d.open)d.showModal();}
+function vwClose(){const d=$v('viewer'); if(d.open)d.close();}
+function vwNav(d){if(!VW.list.length)return; VW.i=(VW.i+d+VW.list.length)%VW.list.length; VW.z=1; VW.x=0; VW.y=0; $v('vw-img').src=VW.list[VW.i]; vwApply();}
+function vwZoom(f){VW.z=Math.min(5,Math.max(1,VW.z*f)); if(VW.z===1){VW.x=0; VW.y=0;} vwApply();}
+document.getElementById('dlg-body').addEventListener('click',e=>{
+  const img=e.target.closest('img[data-full]'); if(!img)return;
+  const all=[...document.querySelectorAll('#dlg-body .gallery img[data-full]')].map(x=>x.dataset.full);
+  vwOpen(all, Math.max(0, all.indexOf(img.dataset.full)));
+});
+$v('vw-x').onclick=vwClose;
+$v('vw-prev').onclick=e=>{e.stopPropagation(); vwNav(-1);};
+$v('vw-next').onclick=e=>{e.stopPropagation(); vwNav(1);};
+$v('vw-zin').onclick=()=>vwZoom(1.4);
+$v('vw-zout').onclick=()=>vwZoom(1/1.4);
+$v('vw-zreset').onclick=()=>{VW.z=1; VW.x=0; VW.y=0; vwApply();};
+$v('vw-stage').addEventListener('wheel',e=>{e.preventDefault(); vwZoom(e.deltaY<0?1.15:1/1.15);},{passive:false});
+$v('vw-img').addEventListener('dblclick',()=>{if(VW.z>1){VW.z=1; VW.x=0; VW.y=0;}else{VW.z=2.5;} vwApply();});
+(function(){
+  const stage=$v('vw-stage'), img=$v('vw-img');
+  let drag=null;
+  img.addEventListener('pointerdown',e=>{if(VW.z<=1)return; drag={x:e.clientX-VW.x,y:e.clientY-VW.y}; img.setPointerCapture(e.pointerId); img.style.cursor='grabbing';});
+  img.addEventListener('pointermove',e=>{if(!drag)return; VW.x=e.clientX-drag.x; VW.y=e.clientY-drag.y; vwApply();});
+  const end=()=>{drag=null; if(VW.z>1)img.style.cursor='grab';};
+  img.addEventListener('pointerup',end);
+  img.addEventListener('pointercancel',end);
+  stage.addEventListener('click',e=>{if(e.target===stage)vwClose();});
+})();
+document.addEventListener('keydown',e=>{
+  if(!$v('viewer').open)return;
+  if(e.key==='ArrowRight')vwNav(1);
+  else if(e.key==='ArrowLeft')vwNav(-1);
+  else if(e.key==='+'||e.key==='=')vwZoom(1.4);
+  else if(e.key==='-')vwZoom(1/1.4);
+});
+// hidden admin: double-shift shows button
+let SH_LAST=0;
+document.addEventListener('keydown',e=>{
+  if(e.key==='Shift'){const t=Date.now(); if(t-SH_LAST<400)showAdminFab(); SH_LAST=t; return;}
+  if(e.key==='Escape'){const f=document.getElementById('admin-fab'); if(f)f.remove();}
+});
+function showAdminFab(){
+  if(document.getElementById('admin-fab'))return;
+  const a=document.createElement('a');
+  a.id='admin-fab'; a.className='btn'; a.href='/admin.html'; a.textContent='Admin 🔧';
+  document.body.appendChild(a);
+  setTimeout(()=>{const f=document.getElementById('admin-fab'); if(f)f.remove();},15000);
+}
+</script>
+</body>
+</html>

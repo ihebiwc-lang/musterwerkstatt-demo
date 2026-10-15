@@ -1,0 +1,4 @@
+INSERT INTO cars (id, titel, preis, km, baujahr, kraftstoff, getriebe, leistung, hu, beschreibung, bilder, erstelltAm) VALUES
+('demo-golf', 'VW Golf 1.6 TDI Comfortline', 9490, 132500, 2017, 'Diesel', 'Schaltgetriebe', 115, '10/2027', 'Scheckheftgepflegt, 2. Hand, Zahnriemen neu, Bremsen neu, Sommer- + Winterräder. HU/AU neu auf Wunsch.', '[]', '2026-10-01T10:00:00.000Z'),
+('demo-astra', 'Opel Astra K 1.4 Turbo', 7990, 98000, 2018, 'Benzin', 'Schaltgetriebe', 125, '05/2027', 'Aus 1. Hand, lückenlos Opel-gepflegt, Klimaautomatik, Sitzheizung, PDC hinten. Ansehen lohnt sich.', '[]', '2026-10-02T10:00:00.000Z'),
+('demo-octavia', 'Skoda Octavia Combi 2.0 TDI', 12990, 155000, 2019, 'Diesel', 'Automatik (DSG)', 150, '03/2027', 'Langstrecke, Firmenwagen, DSG-Service neu, AHK, Navi, Tempomat. Werkstattgeprüft mit 12 Monaten Gewährleistung.', '[]', '2026-10-03T10:00:00.000Z');
