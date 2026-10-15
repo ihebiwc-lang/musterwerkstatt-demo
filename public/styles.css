@@ -98,8 +98,6 @@ footer a{color:#fff}
   .gallery{grid-template-columns:1fr 1fr}
 }
 .gallery img{cursor:zoom-in}
-.car-detail{padding:0 14px 16px}
-.car-detail .gallery{margin-top:12px}
 #admin-fab{position:fixed; bottom:18px; right:18px; z-index:60; animation:vw-pop .18s ease-out}
 #t-date-show{cursor:pointer; background:#fff}
 .dp{position:absolute; left:0; top:100%; z-index:50; background:#fff; border:var(--line); box-shadow:6px 6px 0 #111; padding:10px; margin-top:6px; width:280px; display:none}

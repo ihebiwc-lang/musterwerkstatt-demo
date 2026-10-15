@@ -108,10 +108,8 @@
 
 <section class="block" id="fahrzeuge">
   <div class="wrap">
-    <div class="sec-head"><h2>Fahrzeuge</h2><span class="num" id="fz-count">…</span></div>
-    <p class="mono" style="font-size:13px; text-transform:uppercase; letter-spacing:.08em">Werkstattgeprüft · 12 Monate Gewährleistung · HU/AU neu möglich · Probefahrt nach Absprache</p>
+    <div class="sec-head"><h2>Fahrzeuge</h2><a class="btn ghost" href="/fahrzeuge.html">Alle ansehen →</a></div>
     <div class="cars" id="fz-cars"></div>
-    <p style="margin-top:16px"><button class="btn ghost" id="fz-more">Alle Fahrzeuge anzeigen</button></p>
   </div>
 </section>
 
@@ -128,34 +126,15 @@ function fmt(n){return Number(n||0).toLocaleString('de-DE')+' €'}
 function fmtKm(n){return Number(n||0).toLocaleString('de-DE')+' km'}
 function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 fetch('/api/cars').then(r=>r.json()).then(cars=>{
-  window.FZ=Array.isArray(cars)?cars:[];
-  document.getElementById('fz-count').textContent=window.FZ.length+' FZG';
-  renderFZ(false);
-});
-function renderFZ(all){
-  const list=all?window.FZ:window.FZ.slice(0,3);
+  const list=Array.isArray(cars)?cars.slice(0,3):[];
   document.getElementById('fz-cars').innerHTML=list.map(fzCard).join('')||'<p>Gerade alles verkauft — frag nach, Nachschub kommt wöchentlich.</p>';
-  const b=document.getElementById('fz-more');
-  if(window.FZ.length<=3){b.style.display='none';}
-  else{b.style.display=''; b.textContent=all?'Weniger anzeigen':('Alle '+window.FZ.length+' Fahrzeuge anzeigen'); b.onclick=()=>renderFZ(!all);}
-}
+});
 function fzCard(c){
   const img=(c.bilderUrls&&c.bilderUrls[0])?`<img src="${c.bilderUrls[0]}" alt="${esc(c.titel)}" loading="lazy">`:'WERKSTATT<br>GEPRÜFT';
-  const gal=(c.bilderUrls&&c.bilderUrls.length)?'<div class="gallery">'+c.bilderUrls.map(u=>`<img src="${u}" alt="${esc(c.titel)}" loading="lazy">`).join('')+'</div>':'';
   return `<div class="car"><div class="car-img">${img}<span class="km-badge">${fmtKm(c.km)} · ${c.baujahr}</span></div>
   <div class="car-body"><h3>${esc(c.titel)}</h3><div class="specs"><span>${esc(c.kraftstoff)}</span><span>${esc(c.getriebe)}</span><span>${c.leistung} PS</span></div>
-  <div class="price-row"><span class="price">${fmt(c.preis)}</span><button class="small-btn edit det-btn" type="button">Details</button></div>
-  <div class="car-detail" style="display:none">${gal}<div class="meta"><div>Kilometer</div><div>${fmtKm(c.km)}</div><div>Baujahr</div><div>${c.baujahr}</div><div>Leistung</div><div>${c.leistung} PS</div><div>HU/AU</div><div>${esc(c.hu||'—')}</div></div>
-  <p style="margin:12px 0">${esc(c.beschreibung||'')}</p>
-  <p><a class="btn" href="tel:+490000000000">Anrufen: Probefahrt</a> <a class="btn ghost" href="mailto:info@musterwerkstatt.de?subject=${encodeURIComponent(c.titel)}">Per Mail anfragen</a></p></div></div></div>`;
+  <div class="price-row"><span class="price">${fmt(c.preis)}</span><a class="small-btn edit" href="/fahrzeuge.html">Details</a></div></div></div>`;
 }
-document.getElementById('fz-cars').addEventListener('click',e=>{
-  const b=e.target.closest('.det-btn'); if(!b)return;
-  const d=b.closest('.car').querySelector('.car-detail');
-  const open=d.style.display!=='none';
-  d.style.display=open?'none':'block';
-  b.textContent=open?'Details':'Schließen';
-});
 const DP_MON=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const DP_WD=['So','Mo','Di','Mi','Do','Fr','Sa'];
 const p2=n=>String(n).padStart(2,'0');

@@ -19,9 +19,13 @@
 <div class="sec-head"><h2>Fahrzeuge</h2><span class="num" id="count">…</span></div>
 <p class="mono" style="font-size:13px; text-transform:uppercase; letter-spacing:.08em">Werkstattgeprüft · 12 Monate Gewährleistung · HU/AU neu möglich · Probefahrt nach Absprache</p>
 <div class="filters" style="margin-top:14px">
-<input type="text" id="q" placeholder="Suche: Golf, Diesel, Automatik…" style="flex:2; min-width:200px">
+<input type="text" id="q" placeholder="Suche: Marke, Modell …" style="flex:2; min-width:200px">
+<input type="number" id="pmax" placeholder="Preis bis €" min="0" step="500" style="flex:1; min-width:120px">
+<input type="number" id="kmax" placeholder="KM bis" min="0" step="10000" style="flex:1; min-width:120px">
 <select id="fuel"><option value="">Alle Kraftstoffe</option><option>Benzin</option><option>Diesel</option><option>Hybrid</option><option>Elektro</option><option>Gas</option></select>
+<select id="gear"><option value="">Alle Getriebe</option><option>Schaltgetriebe</option><option>Automatik (DSG)</option><option>Automatik</option></select>
 <select id="sort"><option value="new">Neueste zuerst</option><option value="cheap">Preis aufsteigend</option><option value="exp">Preis absteigend</option><option value="km">Wenig km zuerst</option></select>
+<button class="small-btn" id="freset" type="button">Zurücksetzen</button>
 </div>
 <div class="cars" id="cars"></div>
 </div></section>
@@ -56,16 +60,24 @@ fetch('/api/cars').then(r=>r.json()).then(d=>{ALL=d; render();});
 function render(){
   const q=(document.getElementById('q').value||'').toLowerCase();
   const f=document.getElementById('fuel').value;
+  const g=document.getElementById('gear').value;
   const s=document.getElementById('sort').value;
-  let list=ALL.filter(c=>(!f||c.kraftstoff===f)&&(!q||(c.titel+' '+c.beschreibung+' '+c.getriebe).toLowerCase().includes(q)));
+  const pmax=Number(document.getElementById('pmax').value)||Infinity;
+  const kmax=Number(document.getElementById('kmax').value)||Infinity;
+  let list=ALL.filter(c=>(!f||c.kraftstoff===f)&&(!g||c.getriebe===g)&&Number(c.preis||0)<=pmax&&Number(c.km||0)<=kmax&&(!q||(c.titel+' '+c.beschreibung+' '+c.getriebe+' '+c.kraftstoff).toLowerCase().includes(q)));
   if(s==='cheap')list.sort((a,b)=>a.preis-b.preis);
   else if(s==='exp')list.sort((a,b)=>b.preis-a.preis);
   else if(s==='km')list.sort((a,b)=>a.km-b.km);
   document.getElementById('count').textContent=list.length+' FZG';
   document.getElementById('cars').innerHTML=list.map(card).join('')||'<p>Nichts gefunden. Ruf an — oft steht was in der Halle, was noch nicht online ist.</p>';
 }
-['q','fuel','sort'].forEach(id=>document.getElementById(id).addEventListener('input',render));
+['q','pmax','kmax','fuel','gear','sort'].forEach(id=>document.getElementById(id).addEventListener('input',render));
 document.getElementById('q').addEventListener('keyup',render);
+document.getElementById('freset').addEventListener('click',()=>{
+  ['q','pmax','kmax'].forEach(id=>document.getElementById(id).value='');
+  ['fuel','gear'].forEach(id=>document.getElementById(id).selectedIndex=0);
+  document.getElementById('sort').value='new'; render();
+});
 
 function card(c){
   const img=(c.bilderUrls&&c.bilderUrls[0])?`<img src="${c.bilderUrls[0]}" loading="lazy" alt="${esc(c.titel)}">`:'WERKSTATT<br>GEPRÜFT';
